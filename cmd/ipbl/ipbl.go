@@ -56,6 +56,8 @@ func main() {
 
 	e := gin.New()
 	e.Use(gin.Recovery())
+	e.Use(gin.Logger())
+	e.Use(gin.ErrorLogger())
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(e)
 

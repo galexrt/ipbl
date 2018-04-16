@@ -7,6 +7,7 @@ CREATE TABLE `IPAddress` (
   `Created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `Updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`),
+  UNIQUE KEY `UQ_IPAddress_List` (`ListID`,`Address`,`Network`),
   KEY `IX_IPAddress_Parts` (`Part1`,`Part2`,`Part3`,`Part4`,`Part5`,`Part6`,`Part7`,`Part8`,`Network`),
   KEY `fk_IPAddress_List_idx` (`ListID`),
   CONSTRAINT `fk_IPAddress_List` FOREIGN KEY (`ListID`) REFERENCES `List` (`ID`) ON DELETE CASCADE ON UPDATE NO ACTION
