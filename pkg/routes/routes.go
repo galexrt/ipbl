@@ -15,14 +15,14 @@ type Response struct {
 }
 
 // Register registers routes
-func Register(e *gin.Engine) {
-	e.GET("/", func(c *gin.Context) {
+func Register(r *gin.Engine) {
+	r.GET("/", func(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, Response{
 			Code:    http.StatusOK,
-			Message: "Welcome to galexrt/ipbl server! The result key contains the available IP lists.",
+			Message: "Welcome to ipbl server! The result key contains the available IP lists.",
 			Result:  nil,
 		})
 	})
-	registerIP(e)
-	registerList(e)
+	registerIP(r)
+	registerList(r)
 }

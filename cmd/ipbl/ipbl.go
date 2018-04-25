@@ -13,6 +13,8 @@ import (
 	"github.com/coreos/pkg/flagutil"
 	"github.com/galexrt/ipbl/pkg/db"
 	"github.com/galexrt/ipbl/pkg/routes"
+	raven "github.com/getsentry/raven-go"
+	"github.com/gin-contrib/sentry"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -24,6 +26,7 @@ import (
 type CmdLineOptions struct {
 	DatabaseDriver string
 	DatabaseDSN    string
+	RavenDSN       string
 }
 
 var (
@@ -35,6 +38,7 @@ var (
 func init() {
 	ipblFlags.StringVar(&opts.DatabaseDriver, "database-driver", "mysql", "GORM supported database type")
 	ipblFlags.StringVar(&opts.DatabaseDSN, "database-dsn", "", "DSN to database")
+	ipblFlags.StringVar(&opts.RavenDSN, "raven-dsn", "", "Sentry Raven DSN")
 
 	ipblFlags.Parse(os.Args[1:])
 }
@@ -54,12 +58,15 @@ func main() {
 
 	logger.Infof("starting %s %s %s", os.Args[0], version.Info(), version.BuildContext())
 
-	e := gin.New()
-	e.Use(gin.Recovery())
-	e.Use(gin.Logger())
-	e.Use(gin.ErrorLogger())
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(gin.Logger())
+	if opts.RavenDSN != "" {
+		raven.SetDSN(opts.RavenDSN)
+		r.Use(sentry.Recovery(raven.DefaultClient, false))
+	}
 	p := ginprometheus.NewPrometheus("gin")
-	p.Use(e)
+	p.Use(r)
 
 	dbCon, err := sqlx.Open(opts.DatabaseDriver, opts.DatabaseDSN)
 	if err != nil {
@@ -68,11 +75,11 @@ func main() {
 	db.DBCon = dbCon
 	defer db.DBCon.Close()
 
-	routes.Register(e)
+	routes.Register(r)
 
 	srv := &http.Server{
 		Addr:    ":1232",
-		Handler: e,
+		Handler: r,
 	}
 
 	go func() {

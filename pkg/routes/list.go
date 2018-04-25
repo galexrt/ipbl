@@ -10,10 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func registerList(e *gin.Engine) {
-	e.GET("/ipbl", ListLists)
-	e.POST("/ipbl", CreateList)
-	e.DELETE("/ipbl", DeleteList)
+func registerList(r *gin.Engine) {
+	r.GET("/ipbl", ListLists)
+	r.POST("/ipbl", CreateList)
+	r.DELETE("/ipbl", DeleteList)
 }
 
 func ListLists(c *gin.Context) {
@@ -71,8 +71,10 @@ func CreateList(c *gin.Context) {
 func DeleteList(c *gin.Context) {
 	outputRenderer := getOutputRenderer(c)
 
-	outputRenderer(http.StatusOK, Response{
+	outputRenderer(http.StatusNotImplemented, Response{
 		Code:   http.StatusOK,
 		Result: nil,
 	})
+
+	// TODO
 }
