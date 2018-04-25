@@ -2,7 +2,9 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/galexrt/ipbl/pkg/db"
@@ -70,11 +72,37 @@ func CreateList(c *gin.Context) {
 
 func DeleteList(c *gin.Context) {
 	outputRenderer := getOutputRenderer(c)
+	var err error
+	var listID int
+	paramListID := c.Param("ListID")
+	if listID, err = strconv.Atoi(paramListID); err != nil {
+		err = fmt.Errorf("no, empty or invalid ListID given")
+		outputRenderer(http.StatusBadRequest, Response{
+			Code:  http.StatusBadRequest,
+			Error: err,
+		})
+		c.Error(err)
+		return
+	}
 
-	outputRenderer(http.StatusNotImplemented, Response{
-		Code:   http.StatusOK,
-		Result: nil,
+	var result sql.Result
+	if result, err = db.DBCon.Exec("DELETE FROM ipbl.List WHERE ID = ?;", listID); err != nil {
+		outputRenderer(http.StatusInternalServerError, Response{
+			Code:  http.StatusInternalServerError,
+			Error: err,
+		})
+		c.Error(err)
+		return
+	}
+
+	affected, err := result.RowsAffected()
+
+	outputRenderer(http.StatusOK, Response{
+		Code:    http.StatusOK,
+		Message: fmt.Sprintf("%d row(s) affected", affected),
+		Result: models.List{
+			ID: int64(listID),
+		},
+		Error: err,
 	})
-
-	// TODO
 }

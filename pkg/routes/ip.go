@@ -298,7 +298,7 @@ func DeleteIPFromList(c *gin.Context) {
 
 	outputRenderer(http.StatusOK, Response{
 		Code:    http.StatusOK,
-		Message: fmt.Sprintf("%d rows affected", affected),
+		Message: fmt.Sprintf("%d row(s) affected", affected),
 		Result:  ip,
 		Error:   err,
 	})
